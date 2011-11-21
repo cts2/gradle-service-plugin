@@ -1,0 +1,6 @@
+target/
+.scala_dependencies
+.cache
+.gradle
+.settings
+.bin

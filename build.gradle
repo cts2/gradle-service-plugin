@@ -1,0 +1,44 @@
+apply plugin: 'java' 
+apply plugin: 'eclipse'
+
+defaultTasks 'clean', 'build', 'distPlugin'
+
+configurations {
+    pluginLib.exclude group:'edu.mayo.cts2.framework'
+}
+
+dependencies {
+	compile group: 'edu.mayo.cts2.framework', name: 'service', version: frameworkVersion
+	compile group: 'edu.mayo.cts2.framework', name: 'core', version: frameworkVersion
+} 
+
+repositories { 
+	mavenCentral() 
+	mavenCentral name: 'informatics-repos', 
+	urls: ["http://informatics.mayo.edu/maven/content/repositories/snapshots", 
+		"http://informatics.mayo.edu/maven/content/repositories/releases", 
+		"http://informatics.mayo.edu/maven/content/repositories/thirdparty"] 
+} 
+
+task createPropertiesFile << {
+	new File("build/plugin-props").mkdir()
+	def file = new File("build/plugin-props/plugin.properties")
+
+	file.createNewFile()
+	file.append("plugin.name = $project.name\n")
+	file.append("plugin.version = $project.version\n")
+	file.append("service.provider.class = $serviceProviderClass\n")
+}
+
+task distPlugin(type:Zip,dependsOn: createPropertiesFile) { 
+
+	into(archiveName + '/lib') { 
+		from configurations.pluginLib 
+	} 
+	into(archiveName + '/') { 
+		from "build/plugin-props/plugin.properties"
+	} 
+	into(archiveName + '/') { 
+		from jar.outputs.files 
+	} 
+}
